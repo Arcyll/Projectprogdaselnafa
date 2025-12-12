@@ -10,13 +10,10 @@ private:
     string password;
 
 public:
-    // Constructor
     Admin(string username, string password);
     
-    // Authentication
     bool authenticate(string user, string pass);
     
-    // Display menu
     void displayMenu();
 };
 
