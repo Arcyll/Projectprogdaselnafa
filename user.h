@@ -10,19 +10,16 @@ private:
     string lastName;
 
 public:
-    // Constructor
     Donasi();
     Donasi(string firstName, string lastName);
     
-    // Getters
     string getFirstName();
     string getLastName();
     string getFullName();
     
-    // Setters
     void setName(string firstName, string lastName);
     
-    // Check if donation data is filled
+    // cek jumlah donasi
     bool isEmpty();
 };
 
