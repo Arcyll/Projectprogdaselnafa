@@ -16,10 +16,8 @@ private:
     string donatedTo;
 
 public:
-    // Constructor
     Book(int id, string title, string author, int year, string donaturFirstName, string donaturLastName);
     
-    // Getters
     int getId();
     string getTitle();
     string getAuthor();
@@ -30,10 +28,8 @@ public:
     bool getIsDonated();
     string getDonatedTo();
     
-    // Setters
     void setDonated(string recipient);
     
-    // Display
     void display();
     void displayDonated();
 };
