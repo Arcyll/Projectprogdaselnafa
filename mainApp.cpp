@@ -2,9 +2,9 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-#include <cstdlib>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 #include "header.h"
 #include "book.h"
 #include "user.h"
@@ -12,37 +12,57 @@
 
 using namespace std;
 
-vector<Book> books;
-Admin admin("admin", "admin111");
-int nextBookId = 1;
-
-void loadData();
-void saveData();
-void mainMenu();
-void userMode();
-void adminLogin();
-void adminMenu();
-void addDonation(string firstName, string lastName);
-void displayAvailableBooks();
-void donateBook();
-void displayDonationHistory();
-void clearScreen();
+class SahabatBukuApp {
+private:
+    vector<Book> books;
+    Admin admin;
+    int nextBookId;
+    
+    void loadData();
+    void saveData();
+    void clearScreen();
+    void mainMenu();
+    void userMode();
+    void adminLogin();
+    void adminMenu();
+    void addDonation(string firstName, string lastName);
+    void displayAvailableBooks();
+    void donateBook();
+    void displayDonationHistory();
+    
+public:
+    SahabatBukuApp();
+    ~SahabatBukuApp();
+    
+    void run();
+};
 
 int main() {
-    loadData();  // Load data dari file
-    displayHeader();
-    mainMenu();
-    saveData();  // Save data sebelum keluar
-    
+    SahabatBukuApp app;
+    app.run();
     return 0;
 }
 
-void loadData() {
+SahabatBukuApp::SahabatBukuApp() : admin("admin", "admin111"), nextBookId(1) {
+    loadData();
+}
+
+SahabatBukuApp::~SahabatBukuApp() {
+    saveData();
+}
+
+// Run app
+void SahabatBukuApp::run() {
+    displayHeader();
+    mainMenu();
+}
+
+// Load data dari file
+void SahabatBukuApp::loadData() {
     ifstream file("data_buku.txt");
     
     if (!file.is_open()) {
         cout << "\n  [INFO] File data tidak ditemukan. Membuat data baru...\n";
-        // Data sample
         books.push_back(Book(nextBookId++, "Laskar Pelangi", "Andrea Hirata", 2005, "Budi", "Santoso"));
         books.push_back(Book(nextBookId++, "Bumi Manusia", "Pramoedya Ananta Toer", 1980, "Siti", "Aminah"));
         books.push_back(Book(nextBookId++, "Algoritma Pemrograman", "Rinaldi Munir", 2015, "Admin", "System"));
@@ -68,7 +88,7 @@ void loadData() {
         getline(ss, isDonatedStr, '|');
         getline(ss, donatedTo, '|');
         
-        int id = atoi(idStr.c_str()); //mengubah string ke integer
+        int id = atoi(idStr.c_str());
         int year = atoi(yearStr.c_str());
         bool isDonated = (isDonatedStr == "1");
         
@@ -86,10 +106,16 @@ void loadData() {
     
     file.close();
     nextBookId = maxId + 1;
-    
 }
 
-void saveData() {
+// Save data ke file
+void SahabatBukuApp::saveData() {
+    if (books.size() > 1000) {
+        cout << "\n  [WARNING] Data terlalu banyak (" << books.size() << " buku)!\n";
+        cout << "  [WARNING] Kemungkinan ada error. Data tidak disimpan.\n";
+        return;
+    }
+    
     ofstream file("data_buku.txt");
     
     if (!file.is_open()) {
@@ -111,7 +137,7 @@ void saveData() {
     file.close();
 }
 
-void clearScreen() {
+void SahabatBukuApp::clearScreen() {
     #ifdef _WIN32
         system("cls");
     #else
@@ -119,7 +145,7 @@ void clearScreen() {
     #endif
 }
 
-void mainMenu() {
+void SahabatBukuApp::mainMenu() {
     while (true) {
         cout << "\n  ========== MENU UTAMA ==========\n";
         cout << "  1. User\n";
@@ -129,9 +155,9 @@ void mainMenu() {
         cout << "  ================================\n";
         cout << "  Pilih menu: ";
         
-        int choice;
-        cin >> choice;
-        cin.ignore();
+        string choiceStr;
+        getline(cin, choiceStr);
+        int choice = atoi(choiceStr.c_str());
         
         switch (choice) {
             case 1:
@@ -156,7 +182,7 @@ void mainMenu() {
     }
 }
 
-void userMode() {
+void SahabatBukuApp::userMode() {
     string firstName, lastName;
     
     cout << "\n  ========== MODE USER ==========\n";
@@ -169,7 +195,6 @@ void userMode() {
     
     cout << "\n  Selamat datang, " << firstName << " " << lastName << "!\n";
     
-    // Loop donasi buku
     while (true) {
         cout << "\n  ===== Menu User =====\n";
         cout << "  1. Tambah Donasi Buku\n";
@@ -177,13 +202,13 @@ void userMode() {
         cout << "  =====================\n";
         cout << "  Pilih: ";
         
-        int choice;
-        cin >> choice;
-        cin.ignore();
+        string choiceStr;
+        getline(cin, choiceStr);
+        int choice = atoi(choiceStr.c_str());
         
         if (choice == 1) {
             addDonation(firstName, lastName);
-            saveData();  // Auto save
+            saveData();
         } else if (choice == 2) {
             cout << "\n  Terima kasih atas kontribusi Anda!\n";
             break;
@@ -193,24 +218,41 @@ void userMode() {
     }
 }
 
-void addDonation(string firstName, string lastName) {
-    string title, author;
+void SahabatBukuApp::addDonation(string firstName, string lastName) {
+    string title, author, yearStr;
     int year;
     
     cout << "\n  ===== Input Data Buku =====\n";
     cout << "  Judul Buku: ";
     getline(cin, title);
+    
+    if (title.empty()) {
+        cout << "\n  Judul tidak boleh kosong!\n";
+        return;
+    }
+    
     cout << "  Penulis: ";
     getline(cin, author);
+    
+    if (author.empty()) {
+        cout << "\n  Penulis tidak boleh kosong!\n";
+        return;
+    }
+    
     cout << "  Tahun Terbit: ";
-    cin >> year;
-    cin.ignore();
+    getline(cin, yearStr);
+    
+    year = atoi(yearStr.c_str());
+    if (year == 0 && yearStr != "0") {
+        cout << "\n  Tahun tidak valid!\n";
+        return;
+    }
     
     books.push_back(Book(nextBookId++, title, author, year, firstName, lastName));
     cout << "\n  Buku berhasil ditambahkan ke daftar!\n";
 }
 
-void adminLogin() {
+void SahabatBukuApp::adminLogin() {
     string username, password;
     
     cout << "\n  ========== LOGIN ADMIN ==========\n";
@@ -227,7 +269,7 @@ void adminLogin() {
     }
 }
 
-void adminMenu() {
+void SahabatBukuApp::adminMenu() {
     while (true) {
         cout << "\n  ========== MENU ADMIN ==========\n";
         cout << "  1. Tambah Donasi Buku\n";
@@ -238,9 +280,9 @@ void adminMenu() {
         cout << "  ================================\n";
         cout << "  Pilih menu: ";
         
-        int choice;
-        cin >> choice;
-        cin.ignore();
+        string choiceStr;
+        getline(cin, choiceStr);
+        int choice = atoi(choiceStr.c_str());
         
         switch (choice) {
             case 1: {
@@ -273,7 +315,7 @@ void adminMenu() {
     }
 }
 
-void displayAvailableBooks() {
+void SahabatBukuApp::displayAvailableBooks() {
     vector<Book> availableBooks;
     for (size_t i = 0; i < books.size(); i++) {
         if (!books[i].getIsDonated()) {
@@ -298,14 +340,13 @@ void displayAvailableBooks() {
     cout << "  Total: " << availableBooks.size() << " buku tersedia\n";
 }
 
-void donateBook() {
+void SahabatBukuApp::donateBook() {
     displayAvailableBooks();
     
     if (books.empty()) {
         return;
     }
     
-    // Cek apakah ada buku yang tersedia
     bool hasAvailable = false;
     for (size_t i = 0; i < books.size(); i++) {
         if (!books[i].getIsDonated()) {
@@ -318,12 +359,11 @@ void donateBook() {
         return;
     }
     
-    int id;
-    string destination;
+    string idStr, destination;
     
     cout << "\n  Masukkan ID buku yang akan didonasikan (ketik 0 untuk kembali): ";
-    cin >> id;
-    cin.ignore();
+    getline(cin, idStr);
+    int id = atoi(idStr.c_str());
     
     if (id == 0) return;
     
@@ -341,7 +381,7 @@ void donateBook() {
     cout << "\n  Buku dengan ID tersebut tidak ditemukan atau sudah didonasikan.\n";
 }
 
-void displayDonationHistory() {
+void SahabatBukuApp::displayDonationHistory() {
     vector<Book> donatedBooks;
     for (size_t i = 0; i < books.size(); i++) {
         if (books[i].getIsDonated()) {
@@ -360,7 +400,7 @@ void displayDonationHistory() {
     
     for (size_t i = 0; i < donatedBooks.size(); i++) {
         donatedBooks[i].displayDonated();
-    } 
+    }
     
     cout << "  ======================================================================================================================\n";
     cout << "  Total: " << donatedBooks.size() << " buku telah didonasikan\n";
