@@ -1,5 +1,5 @@
-PROJEK PROGDAS : SAHABAT BUKU
-by:
+PROJEK PROGDAS SAHABAT BUKU
+by
 - Rira
 - Elissa
 - Nabila
